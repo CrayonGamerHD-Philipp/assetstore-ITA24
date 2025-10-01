@@ -11,8 +11,10 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        price REAL NOT NULL
+        product_name TEXT NOT NULL,
+        price DOUBLE NOT NULL,
+        description TEXT,
+        sale INTEGER
     )
     """)
     conn.commit()
@@ -37,7 +39,7 @@ def get_products():
 
 # GET: Einzelnes Produkt
 @app.route("/api/products/<int:product_id>", methods=["GET"])
-def get_product(product_id):
+def get_product_by_id(product_id):
     conn = get_db_connection()
     product = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
     conn.close()
