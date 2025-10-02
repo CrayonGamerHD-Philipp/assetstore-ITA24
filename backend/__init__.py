@@ -2,6 +2,7 @@ import sqlite3
 import os
 from flask import Flask, request, jsonify, send_from_directory
 
+
 app = Flask(__name__)
 DB_NAME = "produkte.db"
 
@@ -42,9 +43,27 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # für dict-artige Ergebnisse
     return conn
 
+# --- CORS ---
+@app.after_request
+def add_cors_headers(response):
+    # erlaube Dev-Origins
+    origin = request.headers.get("Origin", "")
+    if origin in ("http://127.0.0.1:5173", "http://localhost:5173"):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
+
+# Preflight für alle /api/* Routen
+@app.route("/api/<path:_>", methods=["OPTIONS"])
+def cors_preflight(_):
+    return ("", 204)
+
+
 # --- ROUTES ---
 
-# GET: Alle Produkte + Bilder abrufen
+# GET: Alle Produkte
 @app.route("/api/products", methods=["GET"])
 def get_products():
     conn = get_db_connection()
